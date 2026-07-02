@@ -1,0 +1,86 @@
+[
+  {
+    "name": "stats: owner command shows analytics",
+    "steps": [
+      { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] },
+      { "send": { "callback": "onboard:currency:usd" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "onboard:tz:0" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      {
+        "send": { "text": "/stats" },
+        "expect": [
+          { "method": "sendMessage" }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "price: menu shows empty state for empty watchlist",
+    "steps": [
+      { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] },
+      { "send": { "callback": "onboard:currency:usd" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "onboard:tz:0" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      {
+        "send": { "callback": "price:menu" },
+        "expect": [
+          { "method": "answerCallbackQuery" },
+          { "method": "editMessageText" }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "price: command with unknown ticker shows suggestion",
+    "steps": [
+      { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] },
+      { "send": { "callback": "onboard:currency:usd" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "onboard:tz:0" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      {
+        "send": { "text": "/price XXX" },
+        "expect": [
+          { "method": "sendMessage" }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "price: command with empty watchlist returns empty state",
+    "steps": [
+      { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] },
+      { "send": { "callback": "onboard:currency:usd" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "onboard:tz:0" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      {
+        "send": { "text": "/price" },
+        "expect": [
+          { "method": "sendMessage" }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "cancel: resets session state",
+    "steps": [
+      { "send": { "callback": "watchlist:add" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      {
+        "send": { "text": "/cancel" },
+        "expect": [
+          { "method": "sendMessage", "payload": { "text": "Cancelled. Tap /start to open the menu." } }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "menu: back to menu re-renders main menu",
+    "steps": [
+      { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] },
+      { "send": { "callback": "onboard:currency:usd" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "onboard:tz:0" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      {
+        "send": { "callback": "menu:main" },
+        "expect": [
+          { "method": "answerCallbackQuery" },
+          { "method": "editMessageText" }
+        ]
+      }
+    ]
+  }
+]

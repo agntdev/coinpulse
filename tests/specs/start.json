@@ -1,16 +1,69 @@
 [
   {
-    "name": "/start replies with the welcome + main menu",
+    "name": "/start begins onboarding for a new user",
     "steps": [
       {
         "send": { "text": "/start" },
         "expect": [
           {
             "method": "sendMessage",
-            "payload": { "text": "👋 Welcome! Tap a button below to get started." }
+            "payload": {
+              "text": "👋 Welcome to CryptoWatch! Let's get you set up.\n\nWhat currency would you like prices in?"
+            }
           }
         ]
       }
+    ]
+  },
+  {
+    "name": "onboarding: picking a currency shows timezone step",
+    "steps": [
+      { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] },
+      {
+        "send": { "callback": "onboard:currency:usd" },
+        "expect": [
+          { "method": "answerCallbackQuery" },
+          { "method": "editMessageText" }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "onboarding: picking a timezone completes onboarding",
+    "steps": [
+      { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] },
+      { "send": { "callback": "onboard:currency:usd" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      {
+        "send": { "callback": "onboard:tz:0" },
+        "expect": [
+          { "method": "answerCallbackQuery" },
+          { "method": "editMessageText" }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "onboarding: quick-add BTC works",
+    "steps": [
+      { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] },
+      { "send": { "callback": "onboard:currency:usd" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "onboard:tz:0" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      {
+        "send": { "callback": "onboard:quickadd:BTC" },
+        "expect": [
+          { "method": "answerCallbackQuery" },
+          { "method": "editMessageText" }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "/start returns main menu for onboarded users",
+    "steps": [
+      { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] },
+      { "send": { "callback": "onboard:currency:usd" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "onboard:tz:0" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] }
     ]
   }
 ]

@@ -1,0 +1,70 @@
+[
+  {
+    "name": "watchlist: menu shows empty state for new user",
+    "steps": [
+      { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] },
+      { "send": { "callback": "onboard:currency:usd" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "onboard:tz:0" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      {
+        "send": { "callback": "watchlist:menu" },
+        "expect": [
+          { "method": "answerCallbackQuery" },
+          { "method": "editMessageText" }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "watchlist: add a coin via callback data flow works",
+    "steps": [
+      { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] },
+      { "send": { "callback": "onboard:currency:usd" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "onboard:tz:0" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "watchlist:menu" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      {
+        "send": { "callback": "watchlist:add" },
+        "expect": [
+          { "method": "answerCallbackQuery" },
+          { "method": "editMessageText" }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "watchlist: view a coin after adding it",
+    "steps": [
+      { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] },
+      { "send": { "callback": "onboard:currency:usd" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "onboard:tz:0" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] }
+    ]
+  },
+  {
+    "name": "watchlist: toggle enable/disable a coin",
+    "steps": [
+      { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] },
+      { "send": { "callback": "onboard:currency:usd" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "onboard:tz:0" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "onboard:quickadd:BTC" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "menu:main" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      {
+        "send": { "callback": "watchlist:menu" },
+        "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }]
+      }
+    ]
+  },
+  {
+    "name": "watchlist: remove a coin",
+    "steps": [
+      { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] },
+      { "send": { "callback": "onboard:currency:usd" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "onboard:tz:0" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "onboard:quickadd:BTC" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "menu:main" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "watchlist:menu" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      {
+        "send": { "callback": "wl:view:BTC" },
+        "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }]
+      }
+    ]
+  }
+]

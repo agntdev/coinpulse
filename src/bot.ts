@@ -1,13 +1,25 @@
 import { Composer } from "grammy";
 import { readdirSync } from "node:fs";
 import { createBot, type BotContext } from "./toolkit/index.js";
+import type { FlowStep } from "./models.js";
+import { resetDomainStore } from "./store.js";
 
 // The per-chat session shape (ephemeral conversation state only). Extend as the
 // bot grows. Durable domain data must NOT live here — use the toolkit's
 // persistent storage (see AGENTS.md).
 export interface Session {
-  // example: step?: "awaiting_amount";
+  step: FlowStep;
+  coin?: string;
+  coinName?: string;
+  coinId?: string;
+  ruleType?: "threshold" | "percent";
+  ruleDirection?: string;
+  ruleValue?: number;
+  editingRuleId?: string;
+  editingTicker?: string;
 }
+
+export type { BotContext } from "./toolkit/index.js";
 
 export type Ctx = BotContext<Session>;
 
@@ -19,8 +31,14 @@ export type Ctx = BotContext<Session>;
  */
 export async function buildBot(token: string) {
   const bot = createBot<Session>(token, {
-    initial: () => ({}),
+    initial: () => ({
+      step: "idle" as FlowStep,
+    }),
   });
+
+  // Reset domain store for test isolation (harmless no-op in production since
+  // each process has exactly one buildBot call anyway).
+  resetDomainStore();
 
   const dir = new URL("./handlers/", import.meta.url);
   let files: string[] = [];
