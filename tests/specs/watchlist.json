@@ -1,5 +1,24 @@
 [
   {
+    "name": "/watchlist command shows empty state",
+    "steps": [
+      { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] },
+      { "send": { "callback": "onboard:currency:usd" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "onboard:tz:0" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      {
+        "send": { "text": "/watchlist" },
+        "expect": [
+          {
+            "method": "sendMessage",
+            "payload": {
+              "text": "Your watchlist is empty — tap 📋 Watchlist on the menu to add coins."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "watchlist: menu shows empty state for new user",
     "steps": [
       { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] },

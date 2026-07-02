@@ -1,5 +1,24 @@
 [
   {
+    "name": "/summary command shows current state for onboarded user",
+    "steps": [
+      { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] },
+      { "send": { "callback": "onboard:currency:usd" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      { "send": { "callback": "onboard:tz:0" }, "expect": [{ "method": "answerCallbackQuery" }, { "method": "editMessageText" }] },
+      {
+        "send": { "text": "/summary" },
+        "expect": [
+          {
+            "method": "sendMessage",
+            "payload": {
+              "text": "📊 Morning summary is off\n\nTap the menu button to change your summary settings:"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "summary: menu shows current state for onboarded user",
     "steps": [
       { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage" }] },
