@@ -63,6 +63,7 @@ export class DomainStore {
     const raw = JSON.stringify(profile);
     await this.r.set(userKey(profile.userId), raw);
     await this.r.sadd(P.idxUsers, String(profile.userId));
+    await this.syncTelemetryUserCount();
   }
 
   async getAllUserIds(): Promise<number[]> {
@@ -166,13 +167,18 @@ export class DomainStore {
     await this.r.set(P.telemetry, JSON.stringify(t));
   }
 
-  /** Record an alert-fired event in telemetry (counters + rolling log capped at 100). */
-  async recordAlertTelemetry(alert: AlertEvent): Promise<void> {
+  /** Record an alert-fired event in telemetry (counters + rolling log capped at 100, 90-day retention). */
+  async recordAlertTelemetry(alert: AlertEvent, nowMs?: number): Promise<void> {
     const t = await this.getTelemetry();
     t.tickerCounts[alert.ticker] = (t.tickerCounts[alert.ticker] ?? 0) + 1;
     t.ruleCounts[alert.ruleLabel] = (t.ruleCounts[alert.ruleLabel] ?? 0) + 1;
     t.recentAlerts.unshift(alert);
     if (t.recentAlerts.length > 100) t.recentAlerts = t.recentAlerts.slice(0, 100);
+    // Enforce 90-day retention
+    if (nowMs !== undefined) {
+      const cutoff = nowMs - 90 * 24 * 60 * 60 * 1000;
+      t.recentAlerts = t.recentAlerts.filter((a) => a.timestamp >= cutoff);
+    }
     await this.saveTelemetry(t);
   }
 
