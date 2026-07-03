@@ -1,5 +1,5 @@
 import { createRequire } from "node:module";
-import type { AlertEvent, OwnerTelemetry, UserProfile, WatchlistEntry } from "./models.js";
+import type { AlertEvent, AIRecommendationRecord, OwnerTelemetry, UserProfile, WatchlistEntry } from "./models.js";
 
 // =============================================================================
 // Domain store — persistent storage for durable bot data.
@@ -157,7 +157,7 @@ export class DomainStore {
   async getTelemetry(): Promise<OwnerTelemetry> {
     const raw = await this.r.get(P.telemetry);
     if (!raw) {
-      return { totalUsers: 0, tickerCounts: {}, ruleCounts: {}, recentAlerts: [] };
+      return { totalUsers: 0, tickerCounts: {}, ruleCounts: {}, recentAlerts: [], aiUserCount: 0, aiTopCoins: {}, aiRecommendationCounts: {}, recentRecommendations: [] };
     }
     return JSON.parse(raw) as OwnerTelemetry;
   }
@@ -180,6 +180,36 @@ export class DomainStore {
   async syncTelemetryUserCount(): Promise<void> {
     const t = await this.getTelemetry();
     t.totalUsers = await this.countUsers();
+    await this.saveTelemetry(t);
+  }
+
+  // ---- AI recommendation telemetry ----
+
+  /** Record an AI recommendation in telemetry. */
+  async recordAIRecommendation(
+    userId: number,
+    ticker: string,
+    recommendation: "BUY" | "SELL" | "HOLD",
+    confidence: number,
+  ): Promise<void> {
+    const t = await this.getTelemetry();
+    t.aiTopCoins[ticker] = (t.aiTopCoins[ticker] ?? 0) + 1;
+    t.aiRecommendationCounts[recommendation] = (t.aiRecommendationCounts[recommendation] ?? 0) + 1;
+    t.recentRecommendations.unshift({ userId, ticker, timestamp: Date.now(), recommendation, confidence });
+    if (t.recentRecommendations.length > 50) t.recentRecommendations = t.recentRecommendations.slice(0, 50);
+    await this.saveTelemetry(t);
+  }
+
+  /** Sync aiUserCount from user profiles. */
+  async syncAIUserCount(): Promise<void> {
+    const t = await this.getTelemetry();
+    const ids = await this.getAllUserIds();
+    let count = 0;
+    for (const id of ids) {
+      const user = await this.getUser(id);
+      if (user?.aiEnabled) count++;
+    }
+    t.aiUserCount = count;
     await this.saveTelemetry(t);
   }
 }
