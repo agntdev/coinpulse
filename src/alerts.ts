@@ -122,7 +122,7 @@ export function createAlertEngine(deps: AlertEngineDeps): AlertEngine {
       if (ok) {
         delivered.push(event);
         await deps.store.saveAlert(event);
-        await deps.store.recordAlertTelemetry(event);
+        await deps.store.recordAlertTelemetry(event, deps.clock.nowMs());
       }
     }
 
@@ -183,7 +183,7 @@ export function createAlertEngine(deps: AlertEngineDeps): AlertEngine {
       event.delivered = ok;
       if (ok) {
         await deps.store.saveAlert(event);
-        await deps.store.recordAlertTelemetry(event);
+        await deps.store.recordAlertTelemetry(event, deps.clock.nowMs());
       }
       return ok ? event : null;
     }
@@ -208,7 +208,7 @@ export function createAlertEngine(deps: AlertEngineDeps): AlertEngine {
         event.delivered = ok;
         if (ok) {
           await deps.store.saveAlert(event);
-          await deps.store.recordAlertTelemetry(event);
+          await deps.store.recordAlertTelemetry(event, deps.clock.nowMs());
         }
         return ok ? event : null;
       }

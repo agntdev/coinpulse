@@ -14,12 +14,13 @@ import type { Session } from "./bot.js";
 export function startScheduler(bot: Bot<BotContext<Session>>): { stop: () => void } {
   let stopped = false;
   let timer: ReturnType<typeof setInterval> | null = null;
+  const deliver = createDeliver(bot);
 
   // Run every 5 minutes
   async function tick() {
     if (stopped) return;
     try {
-      await checkAlerts();
+      await checkAlerts(deliver);
       await checkSummaries(bot);
     } catch {
       // Scheduler errors are non-fatal
@@ -39,7 +40,7 @@ export function startScheduler(bot: Bot<BotContext<Session>>): { stop: () => voi
   };
 }
 
-async function checkAlerts(): Promise<void> {
+async function checkAlerts(deliver: (userId: number, text: string) => Promise<boolean>): Promise<void> {
   const store = getDomainStore();
   const feed = await defaultPriceFeed();
   const clock = defaultClock;
@@ -48,12 +49,7 @@ async function checkAlerts(): Promise<void> {
     store,
     priceFeed: feed,
     clock,
-    deliver: async (userId, text) => {
-      // Silent delivery — we don't have a bot reference here, but alerts are
-      // delivered inline from the alert engine anyway. This path is handled
-      // by the external caller (e.g., index.ts passes a bot-aware deliver fn).
-      return true;
-    },
+    deliver,
   });
 
   await engine.checkAll();
