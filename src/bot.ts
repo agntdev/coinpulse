@@ -17,6 +17,8 @@ export interface Session {
   ruleValue?: number;
   editingRuleId?: string;
   editingTicker?: string;
+  // AI recommendation fields
+  aiTicker?: string;
 }
 
 export type { BotContext } from "./toolkit/index.js";

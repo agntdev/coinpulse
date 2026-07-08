@@ -25,6 +25,8 @@ export interface WatchlistEntry {
   lastAlertPrice?: number;
   thresholds: ThresholdRule[];
   percents: PercentRule[];
+  /** Per-coin AI override: true = force enable, false = force disable, undefined = use global. */
+  aiOverride?: boolean;
 }
 
 export interface UserProfile {
@@ -39,7 +41,13 @@ export interface UserProfile {
   summaryTime?: string; // "08:00" — HH:MM local, disabled if unset
   onboarded: boolean;
   createdAt: number;    // unix ms
+  /** AI recommendation settings. */
+  aiEnabled?: boolean;  // global opt-in for AI recs; default false
+  /** Trading strategy — set when enabling AI. */
+  strategy?: StrategyOption;
 }
+
+export type StrategyOption = "scalping" | "swing" | "position" | "custom";
 
 export interface AlertEvent {
   userId: number;
@@ -58,6 +66,33 @@ export interface OwnerTelemetry {
   tickerCounts: Record<string, number>; // ticker → total alerts fired
   ruleCounts: Record<string, number>;   // ruleType:d:p → count
   recentAlerts: AlertEvent[];           // capped at 100
+  /** AI recommendation metrics. */
+  aiUserCount: number;                  // users with AI enabled
+  aiTopCoins: Record<string, number>;   // ticker → AI rec count
+  aiRecommendationCounts: Record<string, number>; // BUY/SELL/HOLD → count
+  recentRecommendations: AIRecommendationRecord[]; // capped at 50
+}
+
+/**
+ * Record of an AI recommendation event, stored in telemetry.
+ */
+export interface AIRecommendationRecord {
+  userId: number;
+  ticker: string;
+  timestamp: number;    // unix ms
+  recommendation: string; // BUY | SELL | HOLD
+  confidence: number;    // 0-100
+}
+
+/**
+ * Response from the internal AI recommender service.
+ */
+export interface AIRecommendation {
+  recommendation: "BUY" | "SELL" | "HOLD";
+  confidence: number;       // 0–100
+  rationale: string;        // short text, <=2 sentences
+  suggestedTargetPrice?: number;
+  suggestedTimeHorizon?: string;
 }
 
 // ---- Session (ephemeral conversation state) ----
@@ -76,6 +111,10 @@ export type FlowStep =
   | "edit_rule"
   | "delete_confirm"
   | "awaiting_summary_time"
+  // AI recommendation flow steps
+  | "ai_strategy"
+  | "ai_enable_prefs"
+  | "ai_coin_override";
 
 export interface Session {
   step: FlowStep;
@@ -87,6 +126,9 @@ export interface Session {
   ruleValue?: number;
   editingRuleId?: string;
   editingTicker?: string;
+  // AI recommendation fields
+  aiTicker?: string;
+  aiRecommendation?: AIRecommendation;
 }
 
 // ---- Cooldown / quiet-hours helpers ----

@@ -3,6 +3,7 @@ import { registerMainMenuItem, inlineButton, inlineKeyboard } from "../toolkit/i
 import type { Ctx } from "../bot.js";
 import { getDomainStore } from "../store.js";
 import { tickerToCoinId, fuzzyMatchCoins } from "../price-feed.js";
+import { shouldShowAI } from "../models.js";
 
 // Watchlist management — view, add, remove, and manage alert rules per coin.
 const composer = new Composer<Ctx>();
@@ -170,11 +171,23 @@ composer.callbackQuery(/^wl:view:/, async (ctx) => {
     lines.push("No percentage rules.");
   }
 
+  const profile = await store.getUser(userId);
+  const aiAllowed = profile ? shouldShowAI(profile) : false;
+  const aiOverrideCheck = entry.aiOverride;
+  const showAI = aiAllowed && aiOverrideCheck !== false && !(aiAllowed && aiOverrideCheck === false);
+
   const rows = [
     [inlineButton("📈 Price check", `price:coin:${ticker}`)],
+  ];
+
+  if (showAI) {
+    rows.push([inlineButton("🤖 AI opinion", `ai:recommend:${ticker}`)]);
+  }
+
+  rows.push(
     [inlineButton("➕ Add threshold alert", `wl:addthresh:${ticker}`)],
     [inlineButton("➕ Add % alert", `wl:addpct:${ticker}`)],
-  ];
+  );
 
   if (entry.thresholds.length > 0 || entry.percents.length > 0) {
     rows.push([inlineButton("🗑 Remove all rules", `wl:rmrules:${ticker}`)]);
